@@ -1,6 +1,7 @@
 package com.theironyard.entities;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * Created by noellemachin on 3/15/16.
@@ -22,10 +23,18 @@ public class Photo {
     @Column(nullable = false)
     String filename;
 
-    public Photo(User sender, User recipient, String filename) {
+    @Column(nullable = false)
+    LocalDateTime time;
+
+    @Column(nullable = false)
+    int exist;
+
+    public Photo(User sender, User recipient, String filename, LocalDateTime time, int exist) {
         this.sender = sender;
         this.recipient = recipient;
         this.filename = filename;
+        this.time = time;
+        this.exist = exist;
     }
 
     public Photo() {
@@ -53,5 +62,13 @@ public class Photo {
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    public LocalDateTime getTime() {
+        return time;
+    }
+
+    public int getExist() {
+        return exist;
     }
 }

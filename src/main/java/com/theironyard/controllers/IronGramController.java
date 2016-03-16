@@ -20,6 +20,7 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -65,7 +66,7 @@ public class IronGramController {
         return users.findByName(username);
     }
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
-    public Photo upload(MultipartFile photo, HttpSession session, HttpServletResponse response) throws Exception {
+    public Photo upload(MultipartFile photo, HttpSession session, HttpServletResponse response, int exist) throws Exception {
         String username = (String) session.getAttribute("username");
         if (username == null) {
             throw new Exception("Not logged in.");
@@ -77,7 +78,7 @@ public class IronGramController {
         FileOutputStream fos = new FileOutputStream(photoFile);
         fos.write(photo.getBytes());
 
-        Photo p = new Photo(user, null, photoFile.getName());
+        Photo p = new Photo(user, null, photoFile.getName(), LocalDateTime.now(), exist);
         photos.save(p);
 
         response.sendRedirect("/");
@@ -87,6 +88,11 @@ public class IronGramController {
 
     @RequestMapping(path = "/photos", method = RequestMethod.GET)
     public List<Photo> showPhotos() {
+        for (Photo p : photos.findAll()) {
+            if(java.time.Duration.between(p.getTime(), LocalDateTime.now()).getSeconds() > p.getExist()) {
+                photos.delete(p);
+            }
+        }
         return(List<Photo>) photos.findAll();
     }
 }

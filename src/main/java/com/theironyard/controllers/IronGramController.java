@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -66,33 +67,39 @@ public class IronGramController {
         return users.findByName(username);
     }
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
-    public Photo upload(MultipartFile photo, HttpSession session, HttpServletResponse response, int exist) throws Exception {
+    public Photo upload(MultipartFile photo, HttpSession session, HttpServletResponse response, int exist, String recipientName) throws Exception {
         String username = (String) session.getAttribute("username");
         if (username == null) {
             throw new Exception("Not logged in.");
         }
-
         User user = users.findByName(username);
-
         File photoFile = File.createTempFile("image", photo.getOriginalFilename(), new File("public"));
         FileOutputStream fos = new FileOutputStream(photoFile);
         fos.write(photo.getBytes());
-
-        Photo p = new Photo(user, null, photoFile.getName(), LocalDateTime.now(), exist);
-        photos.save(p);
-
+        if (recipientName != null || !recipientName.equals("")) {
+            if (users.findByName(recipientName).getName().equals(recipientName)) {
+                User recipient = users.findByName(recipientName);
+                Photo p = new Photo(user, recipient, photoFile.getName(), LocalDateTime.now(), exist);
+                photos.save(p);
+                return p;
+            }
+        }
         response.sendRedirect("/");
-
-        return p;
+        return null;
     }
-
     @RequestMapping(path = "/photos", method = RequestMethod.GET)
-    public List<Photo> showPhotos() {
+    public List<Photo> showPhotos(HttpSession session) {
+        User user = users.findByName((String) session.getAttribute("username"));
         for (Photo p : photos.findAll()) {
             if(java.time.Duration.between(p.getTime(), LocalDateTime.now()).getSeconds() > p.getExist()) {
                 photos.delete(p);
             }
         }
-        return(List<Photo>) photos.findAll();
+        return(List<Photo>) photos.findByRecipient(user);
+    }
+    @RequestMapping(path = "/logout", method = RequestMethod.POST)
+    public void logout (HttpSession session, HttpServletResponse response) throws IOException {
+        session.invalidate();
+        response.sendRedirect("/");
     }
 }

@@ -7,10 +7,13 @@
 </form>
 <form action="/upload" method="post" enctype="multipart/form-data" id="upload" hidden>
     <input type="file" name="photo"/>
+    <input type="text" placeholder="WHO GETS THIS SHIT" name="recipientName">
     <input type="number" placeholder="How long until BOOM" name="exist">
     <button type="submit">Upload</button>
 </form>
-
+<form action="/logout" method="post">
+    <button type="submit">Logout? WHY? COME BACK!</button>
+</form>
 
 <div id="photos"></div>
 

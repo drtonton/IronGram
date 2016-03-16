@@ -11,6 +11,7 @@ function getUser(userData) {
         $("#login").show();
     }
     else {
+        $("#logout").show(); // i guess?? should display logout button
         $("#upload").show();
         $.get("/photos", getPhotos);
     }

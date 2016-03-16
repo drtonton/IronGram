@@ -81,7 +81,6 @@ public class IronGramController {
                 User recipient = users.findByName(recipientName);
                 Photo p = new Photo(user, recipient, photoFile.getName(), LocalDateTime.now(), exist);
                 photos.save(p);
-                return p;
             }
         }
         response.sendRedirect("/");
